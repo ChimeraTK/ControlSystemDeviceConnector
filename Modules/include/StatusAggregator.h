@@ -33,8 +33,8 @@ namespace ChimeraTK{
 
         }
         else if(dynamic_cast<StatusAggregator*>(module)){
-            std::string name = module->getName()
-            statusInput.emplace_back(this, name, "", HierarchyModifier::hideThis);
+            std::string name = module->getName();
+            statusInput.emplace_back(this, name, "", "");
         }
         else if(dynamic_cast<ModuleGroup*>(module)){
           //recurse

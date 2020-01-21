@@ -46,13 +46,19 @@ namespace ChimeraTK {
    */
   struct StatusMonitor : public ApplicationModule {
 
-    using ApplicationModule::ApplicationModule;
+    StatusMonitor(EntityOwner* owner, const std::string& name, const std::string& description, const std::string& input,
+        const std::string& output, HierarchyModifier modifier, const std::unordered_set<std::string>& outputTags = {},
+        const std::unordered_set<std::string>& parameterTags = {}, const std::unordered_set<std::string>& tags = {})
+    : ApplicationModule(owner, name, description, modifier, tags), _parameterTags(parameterTags), _input(input),
+      status(this, output, "", "", outputTags) {}
 
     ~StatusMonitor() override {}
     void prepare() override {}
 
     /**Tags for parameters. This makes it easier to connect them to e.g, to control system*/
     std::unordered_set<std::string> _parameterTags;
+
+    const std::string _input;
 
     /**One of four possible states to be reported*/
     ScalarOutput<uint16_t> status;
@@ -64,8 +70,10 @@ namespace ChimeraTK {
   };
 
 
-  /**
+  /** Common template base class for StatusMonitors
    *
+   *  This provides a ScalarPushInput for the variable to be monitored, which
+   *  can be specified by the input parameter of the constructor.
    */
   template<typename T>
   struct StatusMonitorImpl : public StatusMonitor {
@@ -77,12 +85,12 @@ namespace ChimeraTK {
     StatusMonitorImpl(EntityOwner* owner, const std::string& name, const std::string& description, const std::string& input,
         const std::string& output, HierarchyModifier modifier, const std::unordered_set<std::string>& outputTags = {},
         const std::unordered_set<std::string>& parameterTags = {}, const std::unordered_set<std::string>& tags = {})
-    : StatusMonitor(owner, name, description, modifier, tags), _parameterTags(parameterTags), oneUp(this, input),
-      status(this, output, "", "", outputTags) {}
+    : StatusMonitor(owner, name, description, input, output, modifier, outputTags, parameterTags, tags),
+      oneUp(this, input){}
 
     StatusMonitorImpl() { throw logic_error("Default constructor unusable. Just exists to work around gcc bug."); }
 
-    ~StatusMonitor() override {}
+    ~StatusMonitorImpl() override {}
     void prepare() override {}
 
     /**Input value that should be monitored. It is moved one level up, so it's parallel to this monitor object.*/
@@ -96,7 +104,7 @@ namespace ChimeraTK {
   /** Module for status monitoring depending on a maximum threshold value*/
   template<typename T>
   struct MaxMonitor : public StatusMonitorImpl<T> {
-    using StatusMonitorImpl<T>::StatusMonitorImpl<T>;
+    using StatusMonitorImpl<T>::StatusMonitorImpl;
     /** WARNING state to be reported if threshold is reached or exceeded*/
     ScalarPushInput<T> warning{this, "upperWarningThreshold", "", "", StatusMonitor::_parameterTags};
     /** ERROR state to be reported if threshold is reached or exceeded*/
@@ -129,7 +137,7 @@ namespace ChimeraTK {
   /** Module for status monitoring depending on a minimum threshold value*/
   template<typename T>
   struct MinMonitor : public StatusMonitorImpl<T> {
-    using StatusMonitorImpl<T>::StatusMonitorImpl<T>;
+    using StatusMonitorImpl<T>::StatusMonitorImpl;
 
     /** WARNING state to be reported if threshold is crossed*/
     ScalarPushInput<T> warning{this, "lowerWarningThreshold", "", "", StatusMonitor::_parameterTags};
@@ -168,7 +176,7 @@ namespace ChimeraTK {
  */
   template<typename T>
   struct RangeMonitor : public StatusMonitorImpl<T> {
-    using StatusMonitorImpl<T>::StatusMonitorImpl<T>;
+    using StatusMonitorImpl<T>::StatusMonitorImpl;
 
     /** WARNING state to be reported if value is in between the upper and
  * lower threshold including the start and end of thresholds.
@@ -214,7 +222,7 @@ namespace ChimeraTK {
  * reported.*/
   template<typename T>
   struct ExactMonitor : public StatusMonitorImpl<T> {
-    using StatusMonitorImpl<T>::StatusMonitorImpl<T>;
+    using StatusMonitorImpl<T>::StatusMonitorImpl;
     /**ERROR state if value is not equal to requiredValue*/
     ScalarPushInput<T> requiredValue{this, "requiredValue", "", "", StatusMonitor::_parameterTags};
 
@@ -244,7 +252,7 @@ namespace ChimeraTK {
  */
   template<typename T>
   struct StateMonitor : public StatusMonitorImpl<T> {
-    using StatusMonitorImpl<T>::StatusMonitorImpl<T>;
+    using StatusMonitorImpl<T>::StatusMonitorImpl;
 
     /// The state that we are supposed to have
     ScalarPushInput<T> nominalState{this, "nominalState", "", "", StatusMonitor::_parameterTags};

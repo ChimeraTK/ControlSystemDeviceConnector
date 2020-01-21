@@ -14,6 +14,10 @@ namespace ChimeraTK{
    * The StatusAggregator collects results of multiple StatusMonitor instances
    * and aggregates them into a single status, which can take the same values
    * as the result of the individual monitors.
+   *
+   * Note: The aggregated instances are collected on construction. Hence, the
+   * StatusAggregator has to be declared after all instances that shall to be
+   * included in the scope (ModuleGroup, Application, ...) of interest.
    */
   struct StatusAggregator : public ApplicationModule {
 
@@ -21,11 +25,16 @@ namespace ChimeraTK{
                      HierarchyModifier modifier, const std::unordered_set<std::string>& tags = {})
     : ApplicationModule(owner, name, description, modifier, tags)  {}
 
+    ~StatusAggregator() override {}
 
     void mainLoop() override {
 
       // Search for StatusMonitors and other StatusAggregators
-      std::list<Module*> subModuleList{getOwner()->getSubmoduleList()};
+      auto subModuleList = getOwner()->findTag(".*").getSubmoduleList();
+      auto myAccessorList = getOwner()->findTag(".*").getAccessorList();
+
+      // This does not work, we need to operate on the virtual hierarchy
+      //std::list<Module*> subModuleList{getOwner()->getSubmoduleList()};
 
       for(auto module : subModuleList){
 
@@ -42,9 +51,9 @@ namespace ChimeraTK{
         else{}
       }
 
-      while(true){
-      // Status collection goes here
-      }
+//      while(true){
+//      // Status collection goes here
+//      }
     }
 
     /**Vector of status inputs */

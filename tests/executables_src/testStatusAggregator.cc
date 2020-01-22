@@ -21,7 +21,7 @@ struct OuterGroup : public ctk::ModuleGroup {
   ctk::MinMonitor<double_t> outerMinMonitor{this, "outerMinMonitor", "", "watch", "status", ctk::HierarchyModifier::none,
                            {"OUTER_MON_OUTPUT"}, {"OUTER_MON_PARAMS"},{"OUTER_MON_INPUT"}};
 
-  //ctk::StatusAggregator outerStatusAggregator{this, "outerStatusAggregator", "blah", ctk::HierarchyModifier::none, {"STATUS"}};
+  //ctk::StatusAggregator outerStatusAggregator{this, "outerStatusAggregator", "", ctk::HierarchyModifier::none, {"STATUS"}};
 
   struct InnerGroup : public ctk::ModuleGroup {
     using ctk::ModuleGroup::ModuleGroup;
@@ -40,12 +40,12 @@ struct TestApplication : public ctk::Application {
   TestApplication() : Application("testApp"){}
   ~TestApplication(){ shutdown(); }
 
-  OuterGroup outerModuleGroup1{this, "outerModuleGroup1", "", ctk::HierarchyModifier::none, {}};
+  OuterGroup outerModuleGroup1{this, "outerModuleGroup1", ""};
   OuterGroup outerModuleGroup2{this, "outerModuleGroup2", ""};
 
 
   ctk::StatusAggregator globalStatusAggregator{this, "globalStatusAggregator", "Global StatusAggregator of testApp",
-                                               ctk::HierarchyModifier::none, {"STATUS"}};
+                                               "globalStatus", ctk::HierarchyModifier::none, {"STATUS"}};
 
   ctk::ControlSystemModule cs;
 

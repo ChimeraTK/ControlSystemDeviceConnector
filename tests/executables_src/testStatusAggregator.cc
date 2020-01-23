@@ -28,7 +28,7 @@ struct OuterGroup : public ctk::ModuleGroup {
 
     ctk::MinMonitor<double_t> innerMinMonitor{this, "innerMinMonitor", "", "minWatch", "minStatus", ctk::HierarchyModifier::none,
                              {"INNER_MON_OUTPUT"}, {"INNER_MON_PARAMS"},{"INNER_MON_INPUT"}};
-    ctk::StateMonitor<uint8_t> innerMaxMonitor{this, "innerStateMonitor", "", "stateWatch", "stateStatus", ctk::HierarchyModifier::none,
+    ctk::StateMonitor<uint8_t> innerStateMonitor{this, "innerStateMonitor", "", "stateWatch", "stateStatus", ctk::HierarchyModifier::none,
                              {"INNER_MON_OUTPUT"}, {"INNER_MON_PARAMS"},{"INNER_MON_INPUT"}};
 
   } innerGroup{this, "innerModuleGroup", ""};
@@ -43,11 +43,13 @@ struct TestApplication : public ctk::Application {
   OuterGroup outerModuleGroup1{this, "outerModuleGroup1", ""};
   OuterGroup outerModuleGroup2{this, "outerModuleGroup2", ""};
 
+  ctk::StateMonitor<uint8_t> globalStateMonitor{this, "globalStateMonitor", "", "stateWatch", "stateStatus", ctk::HierarchyModifier::none,
+                           {"GLOBAL_MON_OUTPUT"}, {"GLOBAL_MON_PARAMS"},{"GLOBAL_MON_INPUT"}};
+
+  ctk::ControlSystemModule cs;
 
   ctk::StatusAggregator globalStatusAggregator{this, "globalStatusAggregator", "Global StatusAggregator of testApp",
                                                "globalStatus", ctk::HierarchyModifier::none, {"STATUS"}};
-
-  ctk::ControlSystemModule cs;
 
   void defineConnections(){
     findTag(".*").connectTo(cs);

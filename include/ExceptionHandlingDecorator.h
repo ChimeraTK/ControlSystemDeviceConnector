@@ -10,6 +10,7 @@
 #include <ChimeraTK/NDRegisterAccessorDecorator.h>
 
 #include "Application.h"
+#include "ConsumingFanOut.h"
 
 namespace ChimeraTK {
 
@@ -47,6 +48,10 @@ namespace ChimeraTK {
 
     void setOwner(EntityOwner* owner);
 
+    void setConsumingFanOut(ConsumingFanOut<UserType>* c) {
+      _consumingFanOut = c;
+    }
+
    protected:
     using ChimeraTK::NDRegisterAccessor<UserType>::buffer_2D;
     DeviceModule& deviceModule;
@@ -59,6 +64,7 @@ namespace ChimeraTK {
     void setOwnerValidity(DataValidity newValidity);
     boost::shared_ptr<NDRegisterAccessor<UserType>> _recoveryAccessor{nullptr};
     EntityOwner* _owner = {nullptr};
+    ConsumingFanOut<UserType>* _consumingFanOut {nullptr};
   };
 
   DECLARE_TEMPLATE_FOR_CHIMERATK_USER_TYPES(ExceptionHandlingDecorator);

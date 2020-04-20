@@ -151,10 +151,10 @@ namespace ChimeraTK {
   }
 
   template<typename UserType>
-  void ExceptionHandlingDecorator<UserType>::doPostRead(TransferType type, bool hasNewData) {
+  void ExceptionHandlingDecorator<UserType>::doPostRead(TransferType type) {
     bool hasException = false;
     try {
-      this->_target->postRead(type, hasNewData);
+      this->_target->postRead(type);
     }
     catch(ChimeraTK::runtime_error& e) {
       deviceModule.reportException(e.what());
@@ -174,7 +174,7 @@ namespace ChimeraTK {
         try {
           this->_target->read();
           hasException = false;
-          hasNewData = true; // if read() returns there is always new data
+          //hasNewData = true; // if read() returns there is always new data
           /* //#138 Phase 2
            * deviceModule->stopTransfer());
            * // end  of #138 Phase 2
@@ -191,16 +191,16 @@ namespace ChimeraTK {
     }
     setOwnerValidity(hasException);
     // only replace the user buffer if there really is new data
-    if(hasNewData) {
-      for(size_t i = 0; i < buffer_2D.size(); ++i)
-        buffer_2D[i].swap(this->_target->accessChannel(static_cast<unsigned int>(i)));
-    }
+    //if(hasNewData) {
+    for(size_t i = 0; i < buffer_2D.size(); ++i)
+      buffer_2D[i].swap(this->_target->accessChannel(static_cast<unsigned int>(i)));
+    //}
   }
 
   template<typename UserType>
-  void ExceptionHandlingDecorator<UserType>::doPostWrite(TransferType type, bool dataLost) {
+  void ExceptionHandlingDecorator<UserType>::doPostWrite(TransferType type) {
     try {
-      ChimeraTK::NDRegisterAccessorDecorator<UserType>::doPostWrite(type, dataLost);
+      ChimeraTK::NDRegisterAccessorDecorator<UserType>::doPostWrite(type);
     }
     catch(ChimeraTK::runtime_error& e) {
       deviceModule.reportException(e.what());
